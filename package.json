@@ -2,7 +2,9 @@
   "name": "spy-chart-app",
   "version": "1.0.0",
   "dependencies": {
+    "next": "^13.0.0",
     "react": "^18.0.0",
+    "react-dom": "^18.0.0",
     "axios": "^0.21.1",
     "yahoo-finance2": "^1.0.0",
     "chart.js": "^3.5.0"
