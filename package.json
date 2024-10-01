@@ -1,18 +1,24 @@
 {
-  "name": "stock-rsi-backtester",
+  "name": "rsi-trading-strategy",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "next": "14.2.13",
+    "axios": "^1.4.0",
+    "next": "13.4.10",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "yahoo-finance2": "^2.0.0",
-    "react-chartjs-2": "^5.2.0",
-    "chart.js": "^4.3.0",
-    "technicalindicators": "^3.0.0"
+    "react-plotly.js": "^2.5.1",
+    "plotly.js": "^2.20.0",
+    "yahoo-finance2": "^2.6.1"
+  },
+  "devDependencies": {
+    "eslint": "8.50.0",
+    "eslint-config-next": "13.4.10"
   }
 }
