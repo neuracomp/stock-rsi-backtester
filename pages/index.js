@@ -25,7 +25,6 @@ ChartJS.register(
 
 export default function Home() {
   const [ticker, setTicker] = useState('');
-  const [price, setPrice] = useState(null);
   const [historical, setHistorical] = useState([]);
   const [trades, setTrades] = useState([]);
   const [statistics, setStatistics] = useState(null);
@@ -36,10 +35,9 @@ export default function Home() {
   const [entryThreshold, setEntryThreshold] = useState(30);
   const [exitThreshold, setExitThreshold] = useState(70);
 
-  const fetchStockData = async (e) => {
+  const fetchBacktest = async (e) => {
     e.preventDefault();
 
-    setPrice(null);
     setHistorical([]);
     setTrades([]);
     setStatistics(null);
@@ -59,7 +57,6 @@ export default function Home() {
       const data = await response.json();
 
       if (response.ok) {
-        setPrice(data.statistics.totalReturn);
         setHistorical(data.historical);
         setTrades(data.trades);
         setStatistics(data.statistics);
@@ -139,7 +136,7 @@ export default function Home() {
     <div style={styles.container}>
       <h1>Stock RSI Backtester</h1>
 
-      <form onSubmit={fetchStockData} style={styles.form}>
+      <form onSubmit={fetchBacktest} style={styles.form}>
         <input
           type="text"
           value={ticker}
@@ -161,7 +158,7 @@ export default function Home() {
         </div>
 
         <div style={styles.inputGroup}>
-          <label>RSI Window:</label>
+          <label>RSI Window (Period):</label>
           <input
             type="number"
             value={rsiWindow}
