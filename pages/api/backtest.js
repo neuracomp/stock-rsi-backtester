@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     // Extract closing prices
     const closes = historical.map(entry => entry.close);
 
-    // Calculate RSI
+    // Calculate RSI using the RSI window as the period
     const rsiValues = RSI.calculate({ period: parseInt(rsiWindow) || 14, values: closes });
 
     // Align RSI with historical data
@@ -42,47 +42,42 @@ export default async function handler(req, res) {
     // Backtesting logic
     let position = null;
     let trades = [];
-    let buyPrice = 0;
-    let sellPrice = 0;
 
     rsiAligned.forEach(day => {
       if (!position && day.rsi < parseFloat(entryThreshold)) {
         // Buy signal
         position = 'long';
-        buyPrice = day.close;
-        trades.push({ buy: buyPrice, sell: null });
+        trades.push({ buy: day.close, sell: null });
       } else if (position === 'long' && day.rsi > parseFloat(exitThreshold)) {
         // Sell signal
         position = null;
-        sellPrice = day.close;
-        trades[trades.length - 1].sell = sellPrice;
+        trades[trades.length - 1].sell = day.close;
       }
     });
 
     // If position is still open at the end, close it
     if (position === 'long') {
-      sellPrice = rsiAligned[rsiAligned.length - 1].close;
-      trades[trades.length - 1].sell = sellPrice;
+      trades[trades.length - 1].sell = rsiAligned[rsiAligned.length - 1].close;
     }
 
     // Calculate statistics
     const totalTrades = trades.length;
     const winningTrades = trades.filter(trade => trade.sell > trade.buy).length;
-    const winProbability = totalTrades ? (winningTrades / totalTrades) * 100 : 0;
+    const winProbability = totalTrades ? ((winningTrades / totalTrades) * 100).toFixed(2) : '0.00';
     const totalReturn = trades.reduce((acc, trade) => {
       if (trade.sell) {
         return acc + ((trade.sell - trade.buy) / trade.buy) * 100;
       }
       return acc;
-    }, 0);
+    }, 0).toFixed(2);
 
     res.status(200).json({
       trades,
       statistics: {
         totalTrades,
         winningTrades,
-        winProbability: winProbability.toFixed(2),
-        totalReturn: totalReturn.toFixed(2),
+        winProbability,
+        totalReturn,
       },
       historical: rsiAligned,
     });
