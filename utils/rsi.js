@@ -79,3 +79,37 @@ export function calculateStrategyReturns(data, entryRSI, exitRSI, window) {
     cumulativeBuyHoldReturns,
   };
 }
+
+export function optimizeRSI(data, startDate, endDate) {
+  const windowRange = [10, 12, 14, 16, 18, 20, 22, 24, 26, 28];
+  const entryRSIRange = [25, 30, 35, 40, 45];
+  const exitRSIRange = [55, 60, 65, 70, 75, 80, 85, 90, 95];
+
+  let bestParams = {
+    entryRSI: null,
+    exitRSI: null,
+    window: null,
+    return: -Infinity,
+  };
+
+  for (let window of windowRange) {
+    for (let entryRSI of entryRSIRange) {
+      for (let exitRSI of exitRSIRange) {
+        if (exitRSI <= entryRSI) continue; // Exit RSI should be greater than Entry RSI
+        const strategy = calculateStrategyReturns(data, entryRSI, exitRSI, window);
+        const finalReturn = strategy.cumulativeStrategyReturns[strategy.cumulativeStrategyReturns.length - 1];
+
+        if (finalReturn > bestParams.return) {
+          bestParams = {
+            entryRSI,
+            exitRSI,
+            window,
+            return: finalReturn,
+          };
+        }
+      }
+    }
+  }
+
+  return bestParams;
+}
