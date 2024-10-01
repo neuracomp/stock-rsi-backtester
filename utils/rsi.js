@@ -33,7 +33,9 @@ export function calculateRSI(data, window = 14) {
     rsi.push(rsiValue);
   }
 
-  return rsi;
+  // Pad the RSI array to align with the original data length
+  const paddedRSI = [null].concat(rsi);
+  return paddedRSI;
 }
 
 export function calculateStrategyReturns(data, entryRSI, exitRSI, window) {
@@ -80,7 +82,7 @@ export function calculateStrategyReturns(data, entryRSI, exitRSI, window) {
   };
 }
 
-export function optimizeRSI(data, startDate, endDate) {
+export function optimizeRSI(data) {
   const windowRange = [10, 12, 14, 16, 18, 20, 22, 24, 26, 28];
   const entryRSIRange = [25, 30, 35, 40, 45];
   const exitRSIRange = [55, 60, 65, 70, 75, 80, 85, 90, 95];
