@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import axios from 'axios';
-import Plot from 'react-plotly.js';
+import dynamic from 'next/dynamic';
 import { calculateStrategyReturns, optimizeRSI } from '../utils/rsi';
+
+const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
 export default function Home() {
   const [tickers, setTickers] = useState('SPY');
