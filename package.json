@@ -15,7 +15,8 @@
     "react-dom": "18.2.0",
     "react-plotly.js": "^2.5.1",
     "plotly.js": "^2.20.0",
-    "yahoo-finance2": "^2.6.1"
+    "yahoo-finance2": "^2.6.1",
+    "axios-retry": "^3.3.1"
   },
   "devDependencies": {
     "eslint": "8.50.0",
