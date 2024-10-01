@@ -15,17 +15,15 @@ const symbol = 'AAPL'; // Change this to the ticker symbol you want
 const corsProxy = 'https://cors-anywhere.herokuapp.com/';
 const apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?region=US&lang=en-US&includePrePost=false&interval=1d&range=1mo`;
 
-fetch(corsProxy + apiUrl)
+fetch(`/api/stock?symbol=${symbol}`)
     .then(response => response.json())
     .then(data => {
-        const chartData = data.chart.result[0];
-        const timestamps = chartData.timestamp;
-        const prices = chartData.indicators.quote[0].close;
-
-        const labels = timestamps.map(ts => new Date(ts * 1000).toLocaleDateString());
-        drawChart(labels, prices);
+        const labels = data.map(item => new Date(item.date).toLocaleDateString());
+        const prices = data.map(item => item.close);
+        drawChart(labels.reverse(), prices.reverse());
     })
     .catch(error => console.error('Error fetching data:', error));
+
 
 function drawChart(labels, data) {
     const ctx = document.getElementById('myChart').getContext('2d');
