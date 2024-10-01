@@ -20,9 +20,12 @@ export default function Home() {
   const [results, setResults] = useState({});
   const [optimizing, setOptimizing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleFetchAndCalculate = async () => {
     setLoading(true);
+    setError(null); // Reset previous errors
+    setResults({}); // Clear previous results
     const tickerList = tickers.split(',').map(t => t.trim().toUpperCase());
     const selectedStartDate = useCalendar ? startDate : new Date(Date.now() - daysRange * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     const selectedEndDate = useCalendar ? endDate : new Date().toISOString().split('T')[0];
@@ -42,7 +45,7 @@ export default function Home() {
 
         const data = response.data.data;
         if (!data || data.length === 0) {
-          alert(`No data fetched for ${ticker}. Please check the ticker symbol or date range.`);
+          setError(`No data fetched for ${ticker}. Please check the ticker symbol or date range.`);
           continue;
         }
 
@@ -53,7 +56,11 @@ export default function Home() {
         };
       } catch (error) {
         console.error(error);
-        alert(`Error fetching data for ${ticker}.`);
+        if (error.response && error.response.data && error.response.data.error) {
+          setError(`Error for ${ticker}: ${error.response.data.error}`);
+        } else {
+          setError(`An unexpected error occurred while fetching data for ${ticker}.`);
+        }
       }
     }
 
@@ -63,6 +70,8 @@ export default function Home() {
 
   const handleOptimize = async () => {
     setOptimizing(true);
+    setError(null); // Reset previous errors
+    setResults({}); // Clear previous results
     const tickerList = tickers.split(',').map(t => t.trim().toUpperCase());
     const selectedStartDate = useCalendar ? startDate : new Date(Date.now() - daysRange * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     const selectedEndDate = useCalendar ? endDate : new Date().toISOString().split('T')[0];
@@ -82,7 +91,7 @@ export default function Home() {
 
         const data = response.data.data;
         if (!data || data.length === 0) {
-          alert(`No data fetched for ${ticker}. Please check the ticker symbol or date range.`);
+          setError(`No data fetched for ${ticker}. Please check the ticker symbol or date range.`);
           continue;
         }
 
@@ -97,7 +106,11 @@ export default function Home() {
         }
       } catch (error) {
         console.error(error);
-        alert(`Error optimizing for ${ticker}.`);
+        if (error.response && error.response.data && error.response.data.error) {
+          setError(`Error optimizing for ${ticker}: ${error.response.data.error}`);
+        } else {
+          setError(`An unexpected error occurred while optimizing for ${ticker}.`);
+        }
       }
     }
 
@@ -213,13 +226,28 @@ export default function Home() {
         </div>
       )}
       <div style={{ marginBottom: '20px' }}>
-        <button onClick={handleFetchAndCalculate} style={{ padding: '10px 20px', marginRight: '10px' }}>
+        <button
+          onClick={handleFetchAndCalculate}
+          style={{ padding: '10px 20px', marginRight: '10px' }}
+          disabled={loading || optimizing}
+        >
           {loading ? 'Loading...' : 'Show RSI Strategy Graph'}
         </button>
-        <button onClick={handleOptimize} disabled={optimizing || loading} style={{ padding: '10px 20px' }}>
+        <button
+          onClick={handleOptimize}
+          disabled={optimizing || loading}
+          style={{ padding: '10px 20px' }}
+        >
           {optimizing ? 'Optimizing...' : 'Optimize RSI'}
         </button>
       </div>
+
+      {/* Display Error Message */}
+      {error && (
+        <div style={{ color: 'red', marginBottom: '20px' }}>
+          <strong>Error:</strong> {error}
+        </div>
+      )}
 
       {/* Display Results */}
       {Object.keys(results).map((ticker) => {
@@ -227,11 +255,11 @@ export default function Home() {
         const { data, strategy, bestParams } = result;
 
         // Prepare data for plotting
-        const dates = data.map(d => d.date);
+        const dates = data.map(d => new Date(d.date).toISOString().split('T')[0]);
         const closePrices = data.map(d => d.close);
         const rsiValues = strategy.rsi;
-        const cumulativeStrategy = strategy.cumulativeStrategyReturns.map(r => r * 100);
-        const cumulativeBuyHold = strategy.cumulativeBuyHoldReturns.map(r => r * 100);
+        const cumulativeStrategy = strategy.cumulativeStrategyReturns.map(r => (r * 100).toFixed(2));
+        const cumulativeBuyHold = strategy.cumulativeBuyHoldReturns.map(r => (r * 100).toFixed(2));
 
         return (
           <div key={ticker} style={{ marginBottom: '50px' }}>
@@ -285,7 +313,7 @@ export default function Home() {
               ]}
               layout={{
                 width: 900,
-                height: 900,
+                height: 600,
                 title: `${ticker} RSI Trading Strategy Analysis`,
                 showlegend: true,
                 yaxis: { title: 'Close Price', side: 'left' },
