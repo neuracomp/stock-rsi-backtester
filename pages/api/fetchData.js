@@ -1,7 +1,9 @@
 // pages/api/fetchData.js
-
 import yahooFinance from 'yahoo-finance2';
+import axiosRetry from 'axios-retry';
 
+// Configure axios to retry failed requests up to 3 times
+axiosRetry(yahooFinance, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 export default async function handler(req, res) {
   const { ticker, interval, startDate, endDate } = req.query;
 
